@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDTO } from './dto/create-user.dto';
+import { LoginDTO } from './dto/login.dto';
 
 @Controller('users')
 export class UsersController {
@@ -11,13 +12,14 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Post()
+  @Post('signup')
   signUp(@Body() createUserDTO: CreateUserDTO) {
     return this.usersService.createUser(createUserDTO);
   }
 
-  @Post()
-  login(@Body() email: string, password: string) {
+  @Post('login')
+  login(@Body() loginDTO: LoginDTO) {
+    const { email, password } = loginDTO;
     return this.usersService.validatePassword(email, password);
   }
 }
