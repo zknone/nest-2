@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDTO } from './dto/create-user.dto';
+import { SearchUserParams } from './interface/search-user-params.interface';
 
 @Injectable()
 export class UsersService {
@@ -28,8 +29,24 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+  async findAll(params?: Partial<SearchUserParams>): Promise<User[]> {
+    const query: any = {};
+
+    if (params?.email) {
+      query.email = new RegExp(params.email, 'i');
+    }
+    if (params?.name) {
+      query.name = new RegExp(params.name, 'i');
+    }
+    if (params?.contactPhone) {
+      query.contactPhone = new RegExp(params.contactPhone, 'i');
+    }
+
+    return this.userModel
+      .find(query)
+      .skip(params?.offset || 0)
+      .limit(params?.limit || 0)
+      .exec();
   }
 
   async validatePassword(email: string, password: string): Promise<boolean> {
