@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDTO } from './dto/create-user.dto';
-import { SearchUserParams } from './interface/search-user-params.interface';
+import { SearchUserParams } from './interface/interface';
 
 @Injectable()
 export class UsersService {
@@ -12,7 +12,7 @@ export class UsersService {
 
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async createUser(createUserDTO: CreateUserDTO): Promise<User> {
+  async create(createUserDTO: CreateUserDTO): Promise<User> {
     const { passwordHash, ...rest } = createUserDTO;
 
     const hashedPassword = await bcrypt.hash(passwordHash, this.saltRounds);
@@ -23,6 +23,10 @@ export class UsersService {
     });
 
     return newUser.save();
+  }
+
+  async findById(id: string): Promise<User | null> {
+    return this.userModel.findOne({ id }).exec();
   }
 
   async findByEmail(email: string): Promise<User | null> {
