@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateHotelDTO } from './dto/create-hotel.dto';
 import { Hotel, HotelDocument } from './schemas/hotel.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { SearchHotelParams } from './interface/interface';
+import { Model, ObjectId } from 'mongoose';
+import { SearchHotelParams, UpdateHotelParams } from './interface/interface';
 
 @Injectable()
 export class HotelsService {
@@ -19,7 +19,7 @@ export class HotelsService {
     return this.hotelModel.findOne({ id }).exec();
   }
 
-  search(params: SearchHotelParams): Promise<Hotel[]> {
+  async search(params: SearchHotelParams): Promise<Hotel[]> {
     const { limit, offset, title } = params;
 
     const filter = title ? { title: new RegExp(title, 'i') } : {};
@@ -27,6 +27,12 @@ export class HotelsService {
       .find(filter)
       .skip(offset || 0)
       .limit(limit || 0)
+      .exec();
+  }
+
+  async update(id: ObjectId, data: UpdateHotelParams): Promise<Hotel> {
+    return this.hotelModel
+      .findByIdAndUpdate(id, { $set: data }, { new: true })
       .exec();
   }
 }
