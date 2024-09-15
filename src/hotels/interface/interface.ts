@@ -17,4 +17,3 @@ export interface SearchRoomsParams {
   hotel: ObjectId;
   isEnabled?: boolean;
 }
-

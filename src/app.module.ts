@@ -1,19 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersModule } from './users/users.module';
-import { ConfigModule } from '@nestjs/config';
-import { HotelsModule } from './hotels/hotels.module';
+import { HotelsService } from './hotels/hotels.service';
+import { HotelsController } from './hotels/hotels.controller';
+import { HotelRoomsController } from './hotel-rooms/hotel-rooms.controller';
+import { Hotel, HotelSchema } from './hotels/schemas/hotel.schema';
+import { HotelRoom, HotelRoomSchema } from './hotels/schemas/hotel-room.schema';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGO_URI),
-    UsersModule,
-    HotelsModule,
+    MongooseModule.forFeature([
+      { name: Hotel.name, schema: HotelSchema },
+      { name: HotelRoom.name, schema: HotelRoomSchema },
+    ]),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [HotelsController, HotelRoomsController],
+  providers: [HotelsService],
 })
-export class AppModule {}
+export class HotelsModule {}

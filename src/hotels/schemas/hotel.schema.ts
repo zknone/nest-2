@@ -18,4 +18,4 @@ export class Hotel {
   updatedAt: Date;
 }
 
-export const UserSchema = SchemaFactory.createForClass(Hotel);
+export const HotelSchema = SchemaFactory.createForClass(Hotel);

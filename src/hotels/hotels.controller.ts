@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { CreateHotelDTO } from './dto/create-hotel.dto';
 import { HotelsService } from './hotels.service';
 import { SearchHotelParams, UpdateHotelParams } from './interface/interface';
@@ -13,8 +13,8 @@ export class HotelsController {
     return this.hotelService.create(query);
   }
 
-  @Get()
-  findById(@Query() id: string) {
+  @Get(':id')
+  findById(@Param('id') id: string) {
     return this.hotelService.findById(id);
   }
 
@@ -23,8 +23,8 @@ export class HotelsController {
     return this.hotelService.search(params);
   }
 
-  @Put()
-  update(@Body() id: ObjectId, params: UpdateHotelParams) {
+  @Put(':id')
+  update(@Param('id') id: ObjectId, @Body() params: UpdateHotelParams) {
     return this.hotelService.update(id, params);
   }
 }
