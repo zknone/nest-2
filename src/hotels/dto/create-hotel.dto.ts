@@ -1,4 +1,4 @@
 export interface CreateHotelDTO {
-  title: string;
-  description: string;
+  readonly title: string;
+  readonly description: string;
 }
