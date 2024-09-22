@@ -4,7 +4,7 @@ import { HotelsService } from './hotels.service';
 import { SearchHotelParams, UpdateHotelParams } from './interface/interface';
 import { ObjectId } from 'mongoose';
 
-@Controller('hotels')
+@Controller('api/hotels')
 export class HotelsController {
   constructor(private readonly hotelService: HotelsService) {}
 

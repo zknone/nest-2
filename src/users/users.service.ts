@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
@@ -13,27 +17,32 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDTO: CreateUserDTO): Promise<User> {
-    const { passwordHash, ...rest } = createUserDTO;
+    const existingUser = await this.findByEmail(createUserDTO.email);
+    if (existingUser) {
+      throw new ConflictException('Email уже занят');
+    }
 
-    const hashedPassword = await bcrypt.hash(passwordHash, this.saltRounds);
+    const hashedPassword = await bcrypt.hash(
+      createUserDTO.password,
+      this.saltRounds,
+    );
 
     const newUser = new this.userModel({
-      ...rest,
+      ...createUserDTO,
       passwordHash: hashedPassword,
     });
 
     return newUser.save();
   }
 
-  async findById(id: string): Promise<User | null> {
-    return this.userModel.findOne({ id }).exec();
-  }
+  async findAll(
+    params?: Partial<SearchUserParams>,
+    role?: string,
+  ): Promise<User[]> {
+    if (role !== 'admin' && role !== 'manager') {
+      throw new ForbiddenException('Доступ запрещен');
+    }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({ email }).exec();
-  }
-
-  async findAll(params?: Partial<SearchUserParams>): Promise<User[]> {
     const query: any = {};
 
     if (params?.email) {
@@ -53,9 +62,33 @@ export class UsersService {
       .exec();
   }
 
-  async validatePassword(email: string, password: string): Promise<boolean> {
-    const user = await this.findByEmail(email);
-    if (!user) return false;
-    return bcrypt.compare(password, user.passwordHash);
+  async createByAdmin(
+    createUserDTO: CreateUserDTO,
+    role: string,
+  ): Promise<User> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Доступ запрещен');
+    }
+
+    return this.create(createUserDTO);
+  }
+
+  async createByManager(
+    createUserDTO: CreateUserDTO,
+    role: string,
+  ): Promise<User> {
+    if (role !== 'manager') {
+      throw new ForbiddenException('Доступ запрещен');
+    }
+
+    return this.create(createUserDTO);
+  }
+
+  async findById(id: string): Promise<User | null> {
+    return this.userModel.findById(id).exec();
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({ email }).exec();
   }
 }

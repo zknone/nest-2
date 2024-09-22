@@ -1,23 +1,34 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { HotelsService } from './hotels/hotels.service';
-import { HotelsController } from './hotels/hotels.controller';
-import { HotelRoomsController } from './hotel-rooms/hotel-rooms.controller';
-import { Hotel, HotelSchema } from './hotels/schemas/hotel.schema';
-import { HotelRoom, HotelRoomSchema } from './hotels/schemas/hotel-room.schema';
+import { HotelsModule } from './hotels/hotels.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { SupportModule } from './support/support.module';
+import { UsersModule } from './users/users.module';
+import { HotelsController } from './hotels/hotels.controller';
+import { HotelRoomsController } from './hotel-rooms/hotel-rooms.controller';
+import { ReservationsController } from './reservations/reservations.controller';
+import { SupportRequestController } from './support/support-request/support-request.controller';
+import { ReservationsService } from './reservations/reservations.service';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Hotel.name, schema: HotelSchema },
-      { name: HotelRoom.name, schema: HotelRoomSchema },
-    ]),
+    MongooseModule.forRoot(process.env.MONGO_URI),
+    HotelsModule,
     ReservationsModule,
+    UsersModule,
     SupportModule,
+    AuthModule,
   ],
-  controllers: [HotelsController, HotelRoomsController],
-  providers: [HotelsService],
+  controllers: [
+    AppController,
+    HotelsController,
+    HotelRoomsController,
+    ReservationsController,
+    SupportRequestController,
+  ],
+  providers: [ReservationsService, AppService],
 })
-export class HotelsModule {}
+export class AppModule {}

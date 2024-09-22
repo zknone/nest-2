@@ -13,18 +13,26 @@ import {
   ReservationSearchOptions,
 } from './interfaces/reservation.interface';
 
-@Controller('reservations')
+@Controller('api/reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
 
   @Post()
   async createReservation(@Body() reservationDto: ReservationDto) {
-    return this.reservationsService.addReservation(reservationDto);
+    try {
+      return this.reservationsService.addReservation(reservationDto);
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 
   @Delete(':id')
   async removeReservation(@Param('id') id: string) {
-    return this.reservationsService.removeReservation(id);
+    try {
+      return this.reservationsService.removeReservation(id);
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 
   @Get()

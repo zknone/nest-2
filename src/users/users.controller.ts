@@ -1,26 +1,41 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDTO } from './dto/create-user.dto';
-import { LoginDTO } from './dto/login.dto';
 import { SearchUserParams } from './interface/interface';
+import { CustomRequest } from './interface/interface';
 
-@Controller('users')
+@Controller('api')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get()
-  findAll(@Query() query: Partial<SearchUserParams>) {
-    return this.usersService.findAll(query);
+  @Get('admin/users')
+  findAllbyAdmin(
+    @Query() query: Partial<SearchUserParams>,
+    @Req() req: CustomRequest,
+  ) {
+    return this.usersService.findAll(query, req.user?.role);
   }
 
-  @Post('signup')
-  signUp(@Body() createUserDTO: CreateUserDTO) {
+  @Get('manager/users')
+  findAllbyManager(
+    @Query() query: Partial<SearchUserParams>,
+    @Req() req: CustomRequest,
+  ) {
+    return this.usersService.findAll(query, req.user?.role);
+  }
+
+  @Post('client/register')
+  registerClient(@Body() createUserDTO: CreateUserDTO) {
     return this.usersService.create(createUserDTO);
   }
 
-  @Post('login')
-  login(@Body() loginDTO: LoginDTO) {
-    const { email, password } = loginDTO;
-    return this.usersService.validatePassword(email, password);
+  @Post('admin/users')
+  registerByAdmin(@Body() createUserDTO: CreateUserDTO) {
+    return this.usersService.createByAdmin(createUserDTO, 'admin');
+  }
+
+  @Post('manager/users')
+  registerByManager(@Body() createUserDTO: CreateUserDTO) {
+    return this.usersService.createByManager(createUserDTO, 'manager');
   }
 }

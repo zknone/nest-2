@@ -16,13 +16,14 @@ export class ReservationsService implements IReservation {
   ) {}
 
   async addReservation(data: ReservationDto): Promise<Reservation> {
-    const existingReservations = await this.reservationModel.find({
+    const isRoomAvailable = await this.reservationModel.exists({
       roomId: data.roomId,
-      dateStart: { $lt: data.dateEnd },
-      dateEnd: { $gt: data.dateStart },
+      $or: [
+        { dateStart: { $lt: data.dateEnd }, dateEnd: { $gt: data.dateStart } },
+      ],
     });
 
-    if (existingReservations.length > 0) {
+    if (isRoomAvailable) {
       throw new Error('Room is not available for the selected dates');
     }
 
@@ -31,17 +32,31 @@ export class ReservationsService implements IReservation {
   }
 
   async removeReservation(id: string): Promise<void> {
-    await this.reservationModel.findByIdAndDelete(id);
+    const result = await this.reservationModel.findByIdAndDelete(id);
+    if (!result) {
+      throw new Error('Reservation not found');
+    }
   }
 
   async getReservations(
     filter: ReservationSearchOptions,
   ): Promise<Reservation[]> {
-    const query = {
-      userId: filter.userId,
-      dateStart: { $gte: filter.dateStart },
-      dateEnd: { $lte: filter.dateEnd },
-    };
+    const query: any = {};
+
+    if (filter.userId) {
+      query.userId = filter.userId;
+    }
+
+    if (filter.dateStart || filter.dateEnd) {
+      query.$and = [];
+
+      if (filter.dateStart) {
+        query.$and.push({ dateStart: { $gte: filter.dateStart } });
+      }
+      if (filter.dateEnd) {
+        query.$and.push({ dateEnd: { $lte: filter.dateEnd } });
+      }
+    }
 
     return this.reservationModel.find(query).exec();
   }
